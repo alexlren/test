@@ -9,13 +9,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.head_ref }}
+    - uses: actions/checkout@v1
 
     - name: Deploy all updated cycles
       run: |
-        for f in `git diff --name-only master HEAD -- src`; do
+        for f in `git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- src`; do
             id=`basename ${f%%.*}`
             type=${f##*.}
             echo "Adding cycle $id..."
