@@ -1,0 +1,34 @@
+name: Deploy
+
+on: push
+  # push:
+  #   branches:
+  #     - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Deploy all updated cycles
+      run: |
+        for f in `git diff --name-only origin/master -- src`; do
+            id=`basename ${f%%.*}`
+            type=${f##*.}
+            echo "Adding cycle $id..."
+            echo kashyyyk get cycle $id 2>/dev/null
+            if [ $? = 0 ]; then
+                echo "----" 1>&2
+                echo "Warning: cycle $id already exists, skipping" 1>&2
+                echo "This shouldn't happen but if you really want to update the source, then delete the cycle first:" 1>&2
+                echo "$ kashyyyk del cycle $id" 1>&2
+                echo "----" 1>&2
+            else
+                kashyyyk add cycle --data id=$id name=$id "source_type=$type" "source=`cat $f`" && echo "Cycle $id added"
+            fi
+        done
+      env:
+        KASHYYYK_BASE_URL: https://api2.willo.com/v1
+        KASHYYYK_CLIENT_ID: ${{ secrets.KASHYYYK_CLIENT_ID }}
+        KASHYYYK_CLIENT_SECRET: ${{ secrets.KASHYYYK_CLIENT_SECRET }}
