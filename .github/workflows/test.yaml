@@ -13,7 +13,7 @@ jobs:
 
     - name: Deploy all updated cycles
       run: |
-        for f in `git diff --name-only origin/master -- src`; do
+        for f in `git diff --name-only origin/master HEAD -- src`; do
             id=`basename ${f%%.*}`
             type=${f##*.}
             echo "Adding cycle $id..."
